@@ -1,0 +1,32 @@
+{
+    "name": "teamate-basic",
+    "version": "1.0.0",
+    "description": "teamate-basic application implemented in JavaScript",
+    "engines": {
+        "node": ">=8",
+        "npm": ">=5"
+    },
+    "scripts": {
+        "lint": "eslint .",
+        "pretest": "npm run lint",
+        "test": "nyc mocha --recursive"
+    },
+    "engineStrict": true,
+    "author": "Hyperledger",
+    "license": "Apache-2.0",
+    "dependencies": {
+        "base-58": "0.0.1",
+        "body-parser": "1.19.0",
+        "dotenv": "^8.2.0",
+        "express": "4.17.1",
+        "fabric-ca-client": "~1.4.0",
+        "fabric-network": "~1.4.0",
+        "moment": "^2.29.1",
+        "morgan": "^1.10.0",
+        "mysql2": "^2.2.5",
+        "nodemailer": "^6.4.17",
+        "path": "^0.12.7",
+        "twilio": "^3.56.0",
+        "uuid": "^8.3.2"
+    }
+}
