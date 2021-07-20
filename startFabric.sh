@@ -6,7 +6,7 @@
 #
 # Exit on first error
 set -e
-sudo chown -R bstudent:bstudent ./first-network/*
+sudo chown -R ubuntu:ubuntu ./first-network/*
 rm -rf ./app/wallet/*
 
 # don't rewrite paths for Windows Git Bash users

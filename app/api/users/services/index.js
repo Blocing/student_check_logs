@@ -76,6 +76,22 @@ const userService = {
     sendVerificationSMS(number, authCode);
     return authCode;
   },
+  getHolder: async({name, studentId, university, department}) => {
+	let conn;
+	try {
+		conn = await getConn();
+		const [[rows]] = await conn.query("SELECT * FROM Holder WHERE name = ? and student_id = ? and university = ? and department = ?", [ name, studentId, university, department]);
+
+		if(rows == undefined) return -1;
+		else return 1;
+	}
+	catch(e) {
+		consloe.error(e);
+	}
+	finally {
+		if(conn) conn.release();
+	}
+  },
   saveHolder: async ({ name, studentId, university, department }) => {
     // signupVM : id, name, student_id, university, department, holder_did
     let conn;
@@ -90,19 +106,19 @@ const userService = {
     try {
       conn = await getConn();
       await conn.execute(
-        "INSERT INTO Holder(name, student_id, university, department, holder_did) values(?, ?, ?, ?, ?)",
+        "UPDATE Holder SET holder_did = ? WHERE name = ? and student_id = ? and university = ? and department = ?",
         [
+	  newHolder.holder_did,
           newHolder.name,
           newHolder.student_id,
           newHolder.university,
-          newHolder.department,
-          newHolder.holder_did,
+          newHolder.department
         ]
       );
       const [[rows]] = await conn.query(
         "SELECT * FROM Holder order by id DESC limit 1"
       );
-      return rows.id; // ?На?ОИь╛╗хЪе?Йкы╣ЬщЗЙя┐? ?На?ОИыж░хНа?ОДым? ?На?ОМ?аЯ?Щ░ъ╖гыШ╗я┐╜ы▓е я┐╜я┐╜?СеьеЩя┐╜я┐╜я┐╜ number
+      return rows.id; 
     } catch (e) {
       console.error(e);
     } finally {
@@ -110,7 +126,6 @@ const userService = {
     }
   },
   saveStudentIdCard: async (holderId) => {
-    //я┐╜ыЗб?Б║?Цаьи?чнМя╜Л?Ш╗я┐╜ы╡е?На?ОИ?Уа ?На?ОИыж░хНа?ОДым? ?На?ОМ?аЯ?Щ░ъ╖гыШ╗?На?ПЩ?ШЩ?На?ОМ?Вв?На?ОИыж??Цл??РьШЩ
     let today = new Date();
     let conn;
     const newStudentCard = {
@@ -135,7 +150,6 @@ const userService = {
           newStudentCard.status,
         ]
       );
-      //я┐╜ыЗб?Б║?Цаьи?чнМя╜Л?Ш╗я┐╜ы╡е?На?ОИ?Уа ?На?ПЩ?ШЩ?На?ПЩ?ШЩя┐╜ьВв?На?ОИыж??Цл??РьШЩ
       // Card{Card_did: args[0], Holder_id: args[1], Issuer_id: args[2], Update_date: args[3]}
       const [[rows]] = await conn.query(
         "SELECT card_did, holder_id, issuer_id FROM StudentIdCard order by id DESC limit 1"
@@ -147,13 +161,9 @@ const userService = {
         rows.issuer_id.toString(),
         moment().format("YYYY-MM-DD HH:mm:ss"),
       ];
-      console.log(args);
-      console.log(
-        "===========я┐╜ыЗб?Б║?Цаьи?чнМя╜Л?Ш╗я┐╜ы╡е ?На?ОМ?ЬЪ?На?ОМ?Вв?На?ОИ?Уа ?На?ОИыж░хНа?ОДым╕чнМ?Х╛?ШЩ ?На?ПЩ?ШЩ?На?ПЩ?ШЩя┐╜ьВв (setCard)==========="
-      );
+      console.log("=========== (setCard)===========");
       const result = await send(1, "setCard", args);
-      console.log(`${result}?На?ОМы┐??На?ОИы╣НхНа?ОИы╝?`);
-      return rows.holder_id;
+      return [rows.holder_id, rows.card_did];
     } catch (e) {
       console.error(e);
     } finally {
@@ -169,46 +179,3 @@ module.exports = {
 
 
 
-// └╠╕▐└╧ └╬┴ї╝н║ё╜║
-// createEmail: async ({ email }) => {
-  //   console.log("Service createEmail ?Ъе?ЙкыоЗх╜Ыя┐?");
-  //   const authCode = getAuthCode(6);
-  //   let msg = "";
-  //   msg += "<div style='margin:100px;'>";
-  //   msg += "<h1> ?На?ОИ?Из?На?ОИя┐╜ьЪС?ШЩ?ЗЙя┐╜хНа?ОД?Йн?На?ОМ?ТД ?На?ОИ?ЦДчнМя╜МыоЙхаЙя┐╜хНа?ПЩ?ШЩ?На?ПЩ?ШЩ?ЗЙъ▓╜ыдГ?ЩТя┐╜я┐╜ы┐??На?ОИы╣НхНа?ОИы╝? :) </h1> <br>";
-  //   msg +=
-  //     "<p>?На?ОМ?П│?На?ОМ?ЬЪ?П╢?ПЙ?ШЩ?На?ОМы┐??На?ОМы▒? ?На?ОМызДхНа?ОИыж??На?ОИ?Ч░ ?На?ОИ?Иб?На?ОМ?ВЛ?На?ОМы▓? ?На?ОМы╡ечнМ?Х╛?ШЩ ?ФХъ│ХыЬЗя┐╜ъ╣Ия┐╜ык┤?Ная┐? ?На?ОМ?ДЗ?На?ОМы╡ехНа?ОИыж??На?ОИы╗? ?На?ОМ?ЬО, ?На?ОМ?П│?На?ОМ?ЬЪ?П╢?ПЙ?ШЩ?На?ОМы┐? чнМтЙк?Яй?ВЙя┐? ?На?ОМы┐??На?ОМ?а╛?На?ОИыж??На?ОИ?Ч░ ?ЫЕ?Ъп?ИШя┐╜ы╗╗?Цлъ┐╕э?бш?Мя┐╜?На?ОМы┐╗хНа?ОИы╣НхНа?ОИы╝?.<p> <br>";
-  //   msg += "<div align='center' style='border:1px solid black;>";
-  //   msg += "<h3 style='color:blue;'>?На?ОМы╡ечнМ?Х╛?ШЩ ?ФХъ│ХыЬЗя┐╜ъ╣И?На?ОМы┐??На?ОИы╣НхНа?ОИы╝?.</h3>";
-  //   msg += "<div style='font-size:130%'>";
-  //   msg += "<strong>" + authCode + "</strong><div><br/> </div>";
-
-  //   const mail = {
-  //     toAddress: email,
-  //     title: "[?На?ОИ?ЦДчнМя╜МыоЙхаЙя┐╜хНа?ПЩ?ШЩ?На?ПЩ?ШЩ?ЗЙъ▓╜ыдГ?Ная┐?] ?На?ОМ?П│?На?ОМ?ЬЪ ?П╢?ПЙ?ШЩ?На?ОМы┐? ?На?ОМы╡ечнМ?Х╛?ШЩ чнМыбл?ЧДя┐╜ы╡м ?На?ОИ?Из?На?ОД???",
-  //     contents: msg,
-  //     authCode,
-  //   };
-  //   return mail;
-  // },
-  // authEmail: async (email) => {
-  //   console.log("Service authEmail ?Ъе?ЙкыоЗх╜Ыя┐?");
-  //   let transporter = nodemailer.createTransport({
-  //     service: "Gmail",
-  //     auth: {
-  //       user: process.env.GOOGLE_ID,
-  //       pass: process.env.GOOGLE_PASSWORD,
-  //     },
-  //   });
-  //   let mailOptions = {
-  //     from: process.env.GOOGLE_ID,
-  //     to: email.toAddress,
-  //     subject: email.title,
-  //     html: email.contents,
-  //   };
-  //   transporter.sendMail(mailOptions, (error, info) => {
-  //     if (error) console.log(error);
-  //     else console.log(info.response + "?На?ОД?ЙРя┐╜я┐╜?Си?ШЩ");
-  //   });
-  //   return email.authCode;
-  // },

@@ -1,9 +1,4 @@
-const { 
-  userService
-  // sendSMS, 
-  // saveHolder, 
-  // saveStudentIdCard,
- } = require("../services");
+const { userService } = require("../services");
 
 const userController = {
   EmailService: async (req, res, next) => {
@@ -13,17 +8,14 @@ const userController = {
   },
   registerService: async (req, res, next) => {
     const { name, studentId, university, department } = req.body;
-    console.log("?ï¿½ï¿½?ï¿½ï¿½?ï¿½ï¿½ ?ï¿½ï¿½ï¿??");
-    console.log(name, studentId, university, department);
-    const holderId = await userService.saveHolder({
-      name,
-      studentId,
-      university,
-      department,
-    });
-    console.log("holderId" + holderId);
-    const result = await userService.saveStudentIdCard(holderId);
-    res.status(201).json({ success: "success", HolderId: result });
+    const isOk = await userService.getHolder({name, studentId, university, department});
+    if(isOk === -1) res.status(201).json({success: "failed"});
+    else {
+        const holderId = await userService.saveHolder({ name, studentId, university, department });
+	const arr = await userService.saveStudentIdCard(holderId);
+	const result = arr[0]; const card_did = arr[1];
+	res.status(201).json({ success : "success", HolderId : result, CardDid : card_did, name : name, studentId : studentId, university : university, department: department });
+    }
   },
 };
 

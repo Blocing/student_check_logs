@@ -7,18 +7,26 @@ require("dotenv").config();
 const getAttendanceStatus = (start_time, end_time) => {
   let now = new Date();
   let date = now.getDate(); // ?��?��?��筌욑?��
-  
-  let hour = now.getHours(); // ?��?��?��?��?���??
-  let minute = now.getMinutes();
-  let second = now.getSeconds();
+  const utc = now.getTime() + (now.getTimezoneOffset() * 60 * 1000);
+  const KR_TIME_DIFF = 9 * 60 * 60 * 1000;
+  const kr_now = new Date(utc + (KR_TIME_DIFF));
+
+
+  let hour = kr_now.getHours(); // ?��?��?��?��?���??
+  let minute = kr_now.getMinutes();
+  let second = kr_now.getSeconds();
+  console.log(`now ${hour}:${minute}e:${second}`);
+
   const start_hour = Number(start_time.substr(0, 2));
   const start_minute = Number(start_time.substr(3, 2));
   const start_second = Number(start_time.substr(6, 2));
+  console.log(`start ${start_hour}:${start_minute}:${start_second}`);
 
   const end_hour = Number(end_time.substr(0, 2));
   const end_minute = Number(end_time.substr(3, 2));
   const end_second = Number(end_time.substr(6, 2));
-  
+  console.log(`end ${end_hour}:${end_minute}:${end_second}`);
+
   if(hour < start_hour) return ' ';
   else if(hour == start_hour && minute == start_minute) return "PRESENT";
   else if(start_minute < 45 && hour == start_hour && minute <= start_minute + 15) return "PRESENT";
