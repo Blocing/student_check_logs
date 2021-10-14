@@ -46,7 +46,6 @@ const getExpireDate = (today) => {
 const userService = {
   
   sendSMS: async (phoneNumber) => {
-    console.log("Service createEmail");
     let number = "+82" + phoneNumber.substr(1, 10);
     const authCode = getAuthCode(6);
     sendVerificationSMS(number, authCode);
@@ -78,7 +77,6 @@ const userService = {
       department: department,
       holder_did: createDID(),
     };
-    console.log(newHolder);
     try {
       conn = await getConn();
       await conn.execute(
@@ -134,14 +132,12 @@ const userService = {
       const [[rows]] = await conn.query(
         "SELECT card_did, holder_id, issuer_id FROM StudentIdCard order by id DESC limit 1"
       );
-      console.log(rows);
       let args = [
         rows.card_did,
         rows.holder_id.toString(),
         rows.issuer_id.toString(),
         newStudentCard.expire_date
       ];
-      console.log("=========== (setCard)===========");
       const result = await send(1, "setCard", args);
       return [rows.holder_id, rows.card_did];
     } catch (e) {

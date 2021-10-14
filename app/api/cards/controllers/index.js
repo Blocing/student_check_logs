@@ -4,7 +4,6 @@ const cardController = {
   StudentIdCard: async (req, res, next) => {
     const { holder_id } = req.params;
     const result = await fetchStudentIdCardWithHolderId(holder_id);
-	  console.log(result);
     res.status(200).json(result);
   },
 
@@ -18,7 +17,6 @@ const cardController = {
     const { holder_id } = req.params;
     let now = new Date();
     const expireDate = getExpireDate(new Date((now.getTime() + (now.getTimezoneOffset()*60*1000)) + (9*60*60*1000)));
-    console.log(`hah ${expireDate}`);
     const result = await activateStudentIdCardWithHolderId(holder_id, expireDate);
     res.status(201).json(result);
   },

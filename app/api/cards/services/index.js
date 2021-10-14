@@ -15,11 +15,9 @@ const cardService = {
     let second = today.getSeconds();
     
     if(moment(year + "-" + month + "-" + date + " " + hour + ":" + minute + ":" + second).isBefore(expired_date)) {
-	console.log("재발급 불필요");
 	return true;
     }
     else{
-	console.log("재발급 필요");
 	return false;
     }
   },
@@ -38,10 +36,7 @@ const cardService = {
     try {
       conn = await getConn();
       let [[idCard],] = await conn.query("SELECT * FROM StudentIdCard WHERE holder_id = ?", [holder_id,]);
-      console.log(idCard.expire_date);
-	    console.log(idCard.status);
       const args = [idCard.card_did];
-      console.log( "===========블록체인 원장에 학생증 조회 (setCard)===========");
       const result = await send(0, "getCard", args);
       
 	
@@ -64,7 +59,6 @@ const cardService = {
 	}
 	
 	[[idCard],] = await conn.query("SELECT * FROM StudentIdCard WHERE holder_id = ?", [holder_id,]);
-		console.log(idCard);
 
         data.name = information.name;
         data.studentId = information.student_id;

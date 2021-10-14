@@ -23,18 +23,11 @@ const server = () => {
   app.set("PORT", process.env.NODE_ENV || 6464);
   loaders(app);
 
-  //app.listen(app.get("PORT"), (err) => {
-  //  if (err) {
-  //    console.error(err.message);
-  //    process.exit();
-  //} else console.log("=========================DAPP Starting=========================");
-  //});
   https.createServer(options, app).listen(app.get("PORT"), (err) => {
   	if (err) {
 		console.error(err.message);
 		process.exit();
 	}
-	else console.log("START");
   });
 };
 

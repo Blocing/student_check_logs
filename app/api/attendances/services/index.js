@@ -15,17 +15,14 @@ const getAttendanceStatus = (start_time, end_time) => {
   let hour = Number(kr_now.getHours()); // ?��?��?��?��?���??
   let minute = Number(kr_now.getMinutes());
   let second = Number(kr_now.getSeconds());
-  console.log(`now ${hour}:${minute}:${second}`);
 
   const start_hour = Number(start_time.substr(0, 2));
   const start_minute = Number(start_time.substr(3, 2));
   const start_second = Number(start_time.substr(6, 2));
-  console.log(`start ${start_hour}:${start_minute}:${start_second}`);
 
   const end_hour = Number(end_time.substr(0, 2));
   const end_minute = Number(end_time.substr(3, 2));
   const end_second = Number(end_time.substr(6, 2));
-  console.log(`end ${end_hour}:${end_minute}:${end_second}`);
 
   if(hour < start_hour) return ' ';
   else if(hour == start_hour && minute == start_minute) return "PRESENT";
@@ -45,8 +42,6 @@ const attendanceService = {
       const [[rows]] = await conn.query("SELECT * FROM Class WHERE id = ?", [request.class_id]);
       const class_start_time = rows.start_time;
       const class_end_time = rows.end_time;
-            console.log(`CLASS : ${class_start_time} ${class_end_time}`);
-      console.log(request);
       let now = new Date();
       let today = new Date((now.getTime() + (now.getTimezoneOffset()*60*1000)) + (9*60*60*1000));
       let year = today.getFullYear();
@@ -64,8 +59,6 @@ const attendanceService = {
         status : getAttendanceStatus(class_start_time, class_end_time),
         verifier_id : 1
       };
-	    console.log("NEWATTENDANCE==============");
-	console.log(newAttendance);
 	if(newAttendance.statue === ' ') return ' ';
 	    else{
       await conn.execute(
@@ -81,8 +74,6 @@ const attendanceService = {
       
       const [[datas]] = await conn.query(
         "SELECT id, holder_id, class_id, verifier_id, time, status FROM Attendance order by id DESC limit 1"
-        // "SELECT id, holder_id, class_id, verifier_id, time, status FROM Attendance WHERE holder_id = ? AND class_id = ?",
-        // [newAttendance.holder_id, newAttendance.class_id]
       );
 
       // Attendance{attendance_id, class_id, holder_id, status, time, verifier_id}
@@ -95,9 +86,7 @@ const attendanceService = {
         String(datas.verifier_id)
       ];
 
-      console.log("=========== 블록 체인 내 출석 체크 자동 함수 호출 (setAttendance)===========");
       const result = await send(1, "setAttendance", args);
-      console.log(`Transcation ${result}`);
       return datas.id;
 	    }
     } catch (e) {
@@ -119,7 +108,6 @@ const attendanceService = {
         result.name = item.name;
         results.push(result);
       })
-      // console.log(results);
       return results;
 
     } catch (e) {
@@ -134,25 +122,9 @@ const attendanceService = {
       conn = await getConn();
       const [[rows]] = await conn.query("SELECT * FROM Holder WHERE id = ?", [holder_id]);
       const holder = rows;
-      console.log(holder);
 
       const [data] = await conn.query("SELECT * FROM Attendance WHERE class_id = ? AND holder_id = ?", [class_id, holder_id]);
-      console.log(data);
 
-      // const args = [String(holder_id), String(class_id)];
-      // console.log(args);
-      console.log("=========== 블록 체인 내 출석 검증 및 조회 자동 함수 호출 (setAttendance)===========");
-      // const result = await send(0, "getAttendance", args);
-      // console.log(result);
-
-      // {
-      //   Attendance_id: '52',
-      //   Class_id: '1',
-      //   Holder_id: '107',
-      //   Status: 'ABSENT',
-      //   Time: '2021-04-26 16:15:26',
-      //   Verifier_id: '1'
-      // }
       const results = [];
       data.forEach((item, index) => {
         let result = {};
@@ -162,7 +134,6 @@ const attendanceService = {
         results.push(result);
       })
 
-      console.log(results);
 
       return results;
 
@@ -174,7 +145,6 @@ const attendanceService = {
   }
 };
 
-// attendanceService.getAttendanceList(2, 107);
 
 module.exports = {
   attendanceService
