@@ -1,4 +1,3 @@
-const nodemailer = require("nodemailer");
 const moment = require("moment");
 const { v4: uuidv4 } = require("uuid");
 const Base58 = require("base-58");
@@ -30,42 +29,19 @@ const getExpireDate = (today) => {
   let hour = today.getHours(); // ? ?ŽŒ?’„? ?ŽŒëµ?
   let minute = today.getMinutes();
   let second = today.getSeconds();
-  // const thisFirstSemester = year+'? ?Žˆï¿½ï¿½3? ?ŽŒ?œž1? ?ŽŒëµ?23? ?Žˆë»?59ï¿½ê²«? ï¿?59ï¿½ë£¯? ï¿?';
-  const thisFirstSemester = moment(
-    year + "-03-01 23:59:59",
-    "YYYY-MM-DD HH:mm:ss"
-  ).format("YYYY-MM-DD HH:mm:ss");
-  // const thisSecondSemester = year+'? ?Žˆï¿½ï¿½9? ?ŽŒ?œž1? ?ŽŒëµ?23? ?Žˆë»?59ï¿½ê²«? ï¿?59ï¿½ë£¯? ï¿?';
-  const thisSecondSemester = moment(
-    year + "-09-01 23:59:59",
-    "YYYY-MM-DD HH:mm:ss"
-  ).format("YYYY-MM-DD HH:mm:ss");
-  // const nextFirstSemester = (year+1)+'? ?Žˆï¿½ï¿½9? ?ŽŒ?œž1? ?ŽŒëµ?23? ?Žˆë»?59ï¿½ê²«? ï¿?59ï¿½ë£¯? ï¿?';
-  const nextFirstSemester = moment(
-    1 + year + "-09-01 23:59:59",
-    "YYYY-MM-DD HH:mm:ss"
-  ).format("YYYY-MM-DD HH:mm:ss");
-  // if(today.getMonth() == 1 || today.getMonth() == 2){
-  //     return thisFirstSemester;
-  // }
+  const thisFirstSemester = moment(year + "-03-01 23:59:59","YYYY-MM-DD HH:mm:ss").format("YYYY-MM-DD HH:mm:ss");
+  const thisSecondSemester = moment(year + "-09-01 23:59:59","YYYY-MM-DD HH:mm:ss").format("YYYY-MM-DD HH:mm:ss");
+  const nextFirstSemester = moment((1 + year) + "-03-01 23:59:59","YYYY-MM-DD HH:mm:ss").format("YYYY-MM-DD HH:mm:ss");
   if (moment(year + "-" + month + "-" + date).isBefore(year + "-03-01")) {
-    // console.log(thisFirstSemester);
     return thisFirstSemester;
-  } else if (
-    moment(year + "-" + month + "-" + date).isBefore(year + "-09-01")
-  ) {
-    // console.log(thisSecondSemester);
+  } 
+  else if (moment(year + "-" + month + "-" + date).isBefore(year + "-09-01")) {
     return thisSecondSemester;
   }
-  // else if(today.getMonth() == 3 || today.getMonth() == 4 || today.getMonth() == 5 || today.getMonth() == 6 || today.getMonth() == 7 || today.getMonth() == 8){
-  //     return thisSecondSemester;
-  // }
   else {
-    // console.log(nextFirstSemester);
     return nextFirstSemester;
   }
 };
-// getExpireDate(new Date());
 
 const userService = {
   
@@ -126,7 +102,11 @@ const userService = {
     }
   },
   saveStudentIdCard: async (holderId) => {
-    let today = new Date();
+    let temp  = new Date();
+    const utc = temp.getTime() + (temp.getTimezoneOffset() * 60 * 1000);
+    const KR_TIME_DIFF = 9 * 60 * 60 * 1000;
+    const today = new Date(utc + (KR_TIME_DIFF));
+
     let conn;
     const newStudentCard = {
       card_did: createDID(),
@@ -134,7 +114,7 @@ const userService = {
       expire_date: getExpireDate(today),
       holder_id: holderId,
       issuer_id: 1,
-      status: "ACTIVATE",
+      status: "ACTIVATED",
     };
 
     try {
@@ -159,7 +139,7 @@ const userService = {
         rows.card_did,
         rows.holder_id.toString(),
         rows.issuer_id.toString(),
-        moment().format("YYYY-MM-DD HH:mm:ss"),
+        newStudentCard.expire_date
       ];
       console.log("=========== (setCard)===========");
       const result = await send(1, "setCard", args);

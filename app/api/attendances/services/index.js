@@ -12,10 +12,10 @@ const getAttendanceStatus = (start_time, end_time) => {
   const kr_now = new Date(utc + (KR_TIME_DIFF));
 
 
-  let hour = kr_now.getHours(); // ?��?��?��?��?���??
-  let minute = kr_now.getMinutes();
-  let second = kr_now.getSeconds();
-  console.log(`now ${hour}:${minute}e:${second}`);
+  let hour = Number(kr_now.getHours()); // ?��?��?��?��?���??
+  let minute = Number(kr_now.getMinutes());
+  let second = Number(kr_now.getSeconds());
+  console.log(`now ${hour}:${minute}:${second}`);
 
   const start_hour = Number(start_time.substr(0, 2));
   const start_minute = Number(start_time.substr(3, 2));
@@ -31,7 +31,7 @@ const getAttendanceStatus = (start_time, end_time) => {
   else if(hour == start_hour && minute == start_minute) return "PRESENT";
   else if(start_minute < 45 && hour == start_hour && minute <= start_minute + 15) return "PRESENT";
   else if(start_minute < 45 && hour == start_hour && minute > start_minute + 15) return "LATE";
-  else if((hour == start_hour + 1) &&  minute <= ((start_minute + 15) % 60)) "PRESENT";
+  else if((hour == start_hour + 1) &&  minute <= ((start_minute + 15) % 60)) return "PRESENT";
   else if(hour <= end_hour && minute <= end_minute) return "LATE"
   return 'ABSENT';
 }
@@ -45,16 +45,29 @@ const attendanceService = {
       const [[rows]] = await conn.query("SELECT * FROM Class WHERE id = ?", [request.class_id]);
       const class_start_time = rows.start_time;
       const class_end_time = rows.end_time;
-            
+            console.log(`CLASS : ${class_start_time} ${class_end_time}`);
       console.log(request);
+      let now = new Date();
+      let today = new Date((now.getTime() + (now.getTimezoneOffset()*60*1000)) + (9*60*60*1000));
+      let year = today.getFullYear();
+      let month = today.getMonth() + 1;
+      let date = today.getDate();
+      let hour = today.getHours();
+      let minute = today.getMinutes();
+      let second = today.getSeconds();
+
+
       const newAttendance = {
         holder_id : request.holder_id,
         class_id : request.class_id,
-        time : moment().format("YYYY-MM-DD HH:mm:ss"),
+        time : moment(year + "-" + month + "-" + date + " " + hour+":"+minute+":"+second, "YYYY-MM-DD HH:mm:ss").format("YYYY-MM-DD HH:mm:ss"),
         status : getAttendanceStatus(class_start_time, class_end_time),
         verifier_id : 1
       };
-
+	    console.log("NEWATTENDANCE==============");
+	console.log(newAttendance);
+	if(newAttendance.statue === ' ') return ' ';
+	    else{
       await conn.execute(
         "INSERT INTO Attendance(holder_id, class_id, verifier_id, time, status) values(?, ?, ?, ?, ?)",
         [
@@ -86,7 +99,7 @@ const attendanceService = {
       const result = await send(1, "setAttendance", args);
       console.log(`Transcation ${result}`);
       return datas.id;
-      
+	    }
     } catch (e) {
       console.error(e);
     } finally {

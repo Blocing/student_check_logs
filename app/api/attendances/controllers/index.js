@@ -5,7 +5,8 @@ const attendanceController = {
     const result = JSON.parse(req.body.idx);
     const attendance_id = await attendanceService.addAttendance(result);
     console.log(attendance_id);
-    res.status(201).json(attendance_id);
+    if(attendance_id === ' ') res.status(201).json(0);
+    else res.status(201).json(attendance_id);
   },
   getClasses: async (req,res, next) => {
     const result = await attendanceService.getClass();

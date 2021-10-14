@@ -1,4 +1,4 @@
-const { StudentIdCard, putExpireDate } = require("../controllers");
+const { StudentIdCard, putExpireDate, getStudent  } = require("../controllers");
 const router = require("express").Router();
 
 /**
@@ -7,6 +7,13 @@ const router = require("express").Router();
  * @request @param holder_id
  */
 router.get("/:holder_id", StudentIdCard);
+
+/**
+ * @description 학생 인증 조회
+ * @routes GET /idcard/{did}
+ * @request @param did
+ */
+router.get("/auth/:did", getStudent);
 
 /**
  * @description 학생증 재발급
