@@ -17,8 +17,11 @@ const sendSMS = (to, content) => {
 };
 
 const sendVerificationSMS = (to, key) => {
-  sendSMS(to, `인증코드 : ${key}`);
+  console.log("ZZ");
+	sendSMS(to, `인증코드 : ${key}`);
 };
+
+sendVerificationSMS("01056999305", 1234);
 module.exports = {
   sendVerificationSMS,
 };

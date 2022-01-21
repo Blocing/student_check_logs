@@ -4,6 +4,7 @@ const userController = {
   EmailService: async (req, res, next) => {
     const { phoneNumber } = req.body;
     const result = await userService.sendSMS(phoneNumber);
+	  console.log(result);
     res.status(201).json({ success: true, authCode: result });
   },
   registerService: async (req, res, next) => {

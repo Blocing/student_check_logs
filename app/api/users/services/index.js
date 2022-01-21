@@ -79,6 +79,8 @@ const userService = {
     };
     try {
       conn = await getConn();
+      const [[rows]] = await conn.query("SELECT * FROM Holder WHERE name = ? and student_id = ? and university = ? and department = ?", [ name, studentId, university, department]);
+
       await conn.execute(
         "UPDATE Holder SET holder_did = ? WHERE name = ? and student_id = ? and university = ? and department = ?",
         [
@@ -89,9 +91,9 @@ const userService = {
           newHolder.department
         ]
       );
-      const [[rows]] = await conn.query(
-        "SELECT * FROM Holder order by id DESC limit 1"
-      );
+     // const [[rows]] = await conn.query(
+     //   "SELECT * FROM Holder order by id DESC limit 1"
+     // );
       return rows.id; 
     } catch (e) {
       console.error(e);

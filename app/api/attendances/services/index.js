@@ -15,21 +15,26 @@ const getAttendanceStatus = (start_time, end_time) => {
   let hour = Number(kr_now.getHours()); // ?��?��?��?��?���??
   let minute = Number(kr_now.getMinutes());
   let second = Number(kr_now.getSeconds());
+	console.log(`${hour} ${minute} ${second}`);
 
   const start_hour = Number(start_time.substr(0, 2));
   const start_minute = Number(start_time.substr(3, 2));
   const start_second = Number(start_time.substr(6, 2));
+	console.log(`${start_hour} ${start_minute} ${start_second}`);
 
   const end_hour = Number(end_time.substr(0, 2));
   const end_minute = Number(end_time.substr(3, 2));
   const end_second = Number(end_time.substr(6, 2));
+	console.log(`${end_hour} ${end_minute} ${end_second}`);
+
 
   if(hour < start_hour) return ' ';
   else if(hour == start_hour && minute == start_minute) return "PRESENT";
   else if(start_minute < 45 && hour == start_hour && minute <= start_minute + 15) return "PRESENT";
   else if(start_minute < 45 && hour == start_hour && minute > start_minute + 15) return "LATE";
-  else if((hour == start_hour + 1) &&  minute <= ((start_minute + 15) % 60)) return "PRESENT";
-  else if(hour <= end_hour && minute <= end_minute) return "LATE"
+  else if((hour == start_hour + 1) && start_minute >= 45 && minute <= ((start_minute + 15) % 60)) return "PRESENT";
+  else if(hour < end_hour) return "LATE";
+  else if(hour == end_hour && minute <= end_minute) return "LATE";
   return 'ABSENT';
 }
 
@@ -71,7 +76,7 @@ const attendanceService = {
           newAttendance.status
         ]
       );
-      
+      console.log(newAttendance);
       const [[datas]] = await conn.query(
         "SELECT id, holder_id, class_id, verifier_id, time, status FROM Attendance order by id DESC limit 1"
       );
